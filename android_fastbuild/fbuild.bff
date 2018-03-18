@@ -35,9 +35,9 @@ Compiler( 'clangC' )
 ;----------------------
 .AndroidBaseConfig = [
 	.Platform           = 'Android'
-	.Compiler           = 'clangC'
+	.Compiler           = 'clang'
 	;.CompilerC          = 'clangC'
-	.CPlusPlusStdFlag  	= ' '
+	.CPlusPlusStdFlag  	= ' -std=c++11'
 	.DEFINES          	= '-D__ANDROID__ -DOS_ANDROID -DANDROID -D_ANDROID_ -D_ANDROID -DANDROID_NDK'
 	.CFLAGS            	= ' -fvisibility=hidden -fpic' ;VERY IMPORTANT for security reasons, do not remove in case of a problem with these flags, there should be a different solution
 						+ ' -Wno-psabi -Wno-write-strings -fsigned-char -w -g $CPlusPlusStdFlag$ -fstack-protector -fomit-frame-pointer -fno-strict-aliasing'
@@ -52,7 +52,7 @@ Compiler( 'clangC' )
 	.Linker            	= '$NDKToolchainArmGccRoot$\arm-linux-androideabi\bin\ld.exe'
 	.LibrarianOptions  	= '-r -s %2 %1'
 	.LinkerOptions     	= ' -shared -o %2 %1'
-                        + ' --gc-sections'
+                        ;+ ' --gc-sections'
                         + ' --build-id'
     					+ ' -march=armv7-a'
                         + ' -z relro -z now --fix-cortex-a8'
@@ -60,7 +60,7 @@ Compiler( 'clangC' )
                         + ' -z noexecstack'
                         + ' --warn-shared-textrel'
                         + ' --fatal-warnings'
-	.LinkerSystemLibs   = '-lGLESv2 -llog -landroid -lEGL -lc -lm -ldl -lm'
+	.LinkerSystemLibs   = '-lGLESv2 -llog -lEGL'
 ]
 
 .AndroidArmBaseConfig = [
@@ -119,7 +119,7 @@ Compiler( 'clangC' )
 		Using(.AndroidArmBaseConfig)
 
 		.Libraries = { 
-			"GLES2_obj_C-Release-ARM",
+			"GLES2_obj_C++-Release-ARM",
 		}
 ;		.LinkerLinkOpjects = false
 		.LinkerOptions + ' $LinkerSystemLibs$ $LinkerSystemPaths$'
@@ -147,10 +147,12 @@ Compiler( 'clangC' )
 
 		.EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
 		.Libraries = { 
-			'GLES2_obj_C-Debug-ARM'
+			'GLES2_obj_C++-Debug-ARM'
 		}
 		;.LinkerLinkOpjects = false
 		.LinkerOptions  + ' $LinkerSystemLibs$'
+                        + ' $NDKRoot$\platforms\$NDKPlatform$\arch-arm\usr\lib\crtbegin_so.o'
+						+ ' $NDKRoot$\platforms\$NDKPlatform$\arch-arm\usr\lib\crtend_so.o'
                         + ' $LinkerSystemPaths$'
                         + ' -verbose'
 		.LinkerType = "auto"
