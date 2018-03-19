@@ -1,6 +1,6 @@
 ; Automatic Android Paths
 ;-------------------------
-.NDKRoot = 'D:\DevTools\android-ndk-r15c'
+.NDKRoot = 'E:\DevTools\android-ndk-r15c'
 .NATIVE_API_LEVEL	 = '15'
 .NDKToolchainVersion = '4.9'
 .NDKToolchains       = '$NDKRoot$\toolchains'
@@ -52,7 +52,7 @@ Compiler( 'clangC' )
 	.Linker            	= '$NDKToolchainArmGccRoot$\arm-linux-androideabi\bin\ld.exe'
 	.LibrarianOptions  	= '-r -s %2 %1'
 	.LinkerOptions     	= ' -shared -o %2 %1'
-                        ;+ ' --gc-sections'
+                        + ' --gc-sections'
                         + ' --build-id'
     					+ ' -march=armv7-a'
                         + ' -z relro -z now --fix-cortex-a8'
@@ -60,7 +60,7 @@ Compiler( 'clangC' )
                         + ' -z noexecstack'
                         + ' --warn-shared-textrel'
                         + ' --fatal-warnings'
-	.LinkerSystemLibs   = '-lGLESv2 -llog -lEGL'
+	.LinkerSystemLibs   = '-lGLESv2 -llog -lEGL -lc -lm -lstdc++ -ldl'
 ]
 
 .AndroidArmBaseConfig = [
@@ -76,7 +76,7 @@ Compiler( 'clangC' )
 						+ ' -I$NDKToolchainArmGccRoot$\lib\gcc\arm-linux-androideabi\4.9.x\armv7-a'
                         + ' -rpath-link=$NDKRoot$\platforms\$NDKPlatform$\arch-arm\usr\lib'
 	.IncludePaths       + ' -I$NDKRoot$\sysroot\usr\include\arm-linux-androideabi'
-	;.LinkerSystemLibs   + ' -lunwind'
+	.LinkerSystemLibs   + ' -lunwind'
 ]
 
 .AndroidReleaseBaseConfig = [
@@ -100,7 +100,7 @@ Compiler( 'clangC' )
 
 	Using(.Project)
 
-	ObjectList('GLES2_obj_C++-Release-ARM')
+	ObjectList('GLES2_obj_C++-Release')
 	{
 		Using(.AndroidReleaseBaseConfig)
 		Using(.AndroidArmBaseConfig)
@@ -113,21 +113,21 @@ Compiler( 'clangC' )
 		.CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2 -v'
 	}
 
-	DLL('GLES2-Release-ARM')
+	DLL('GLES2-Release')
 	{
 		Using(.AndroidReleaseBaseConfig)
 		Using(.AndroidArmBaseConfig)
 
 		.Libraries = { 
-			"GLES2_obj_C++-Release-ARM",
+			"GLES2_obj_C++-Release",
 		}
-;		.LinkerLinkOpjects = false
+		.LinkerLinkOpjects = false
 		.LinkerOptions + ' $LinkerSystemLibs$ $LinkerSystemPaths$'
 		.LinkerType = "auto"
 		.LinkerOutput = '$Location$/release/libs/armeabi-v7a/libGLES2.so'
 	}
 	
-	ObjectList('GLES2_obj_C++-Debug-ARM')
+	ObjectList('GLES2_obj_C++-Debug')
 	{
 		Using(.AndroidDebugBaseConfig)
 		Using(.AndroidArmBaseConfig)
@@ -140,16 +140,16 @@ Compiler( 'clangC' )
 		.CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2 -v'
 	}
 
-	DLL('GLES2-Debug-ARM')
+	DLL('GLES2-Debug')
 	{
 		Using(.AndroidDebugBaseConfig)
 		Using(.AndroidArmBaseConfig)
 
-		.EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
+		.EntryPointLibsList = 'GLES2_obj_C-Debug'
 		.Libraries = { 
-			'GLES2_obj_C++-Debug-ARM'
+			'GLES2_obj_C++-Debug'
 		}
-		;.LinkerLinkOpjects = false
+		.LinkerLinkOpjects = false
 		.LinkerOptions  + ' $LinkerSystemLibs$'
                         + ' $NDKRoot$\platforms\$NDKPlatform$\arch-arm\usr\lib\crtbegin_so.o'
 						+ ' $NDKRoot$\platforms\$NDKPlatform$\arch-arm\usr\lib\crtend_so.o'
@@ -163,8 +163,8 @@ Compiler( 'clangC' )
 Alias('all')
 {
 	.Targets = {
-		;'GLES2-Release-ARM',
-		'GLES2-Debug-ARM',
+		'GLES2-Release',
+		'GLES2-Debug',
 	}
 }
 
