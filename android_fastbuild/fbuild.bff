@@ -1,7 +1,7 @@
 ; Automatic Android Paths
 ;-------------------------
 .NDKRoot = 'e:\DevTools\android-ndk-r17'
-.NATIVE_API_LEVEL    = '15'
+.NATIVE_API_LEVEL    = '16'
 .NDKToolchainVersion = '4.9'
 .NDKToolchains       = '$NDKRoot$\toolchains'
 .NDKToolchainArmType = 'arm-linux-androideabi'
@@ -158,7 +158,7 @@ Compiler( 'clangC' )
 Alias('all')
 {
     .Targets = {
-        ;'GLES2-Release-ARM',
+        'GLES2-Release-ARM',
         'GLES2-Debug-ARM',
     }
 }
