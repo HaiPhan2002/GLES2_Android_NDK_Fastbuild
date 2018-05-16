@@ -23,15 +23,15 @@ android {
         }
     }
     sourceSets
-            {
-                debug {
-                    jniLibs.srcDir '../android_fastbuild/debug/libs/'
-                }
-                release {
-                    jniLibs.srcDir '../android_fastbuild/release/libs/'
-                }
+    {
+        debug {
+            jniLibs.srcDir '../android_fastbuild/debug/libs/'
+        }
+        release {
+            jniLibs.srcDir '../android_fastbuild/release/libs/'
+        }
 
-            }
+    }
     externalNativeBuild {
         ndkBuild {
             path 'src/main/jni/Android.mk'

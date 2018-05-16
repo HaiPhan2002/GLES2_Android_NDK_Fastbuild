@@ -35,9 +35,10 @@ Compiler( 'clangC' )
 ;----------------------
 .AndroidBaseConfig = [
     .Platform           = 'Android'
-    .Compiler           = 'clang'
-    ;.CompilerC          = 'clangC'
-    .CPlusPlusStdFlag   = ' -std=c++11'
+    ;.Compiler           = 'clang'
+    .Compiler          = 'clangC'
+    ;.CPlusPlusStdFlag   = ' -std=c++11'
+    .CPlusPlusStdFlag   = ' -std=gnu99'
     .DEFINES            = '-D__ANDROID__ -DOS_ANDROID -DANDROID -D_ANDROID_ -D_ANDROID -DANDROID_NDK'
     .CFLAGS             = ' -fvisibility=hidden -fpic' ;VERY IMPORTANT for security reasons, do not remove in case of a problem with these flags, there should be a different solution
                         + ' -Wno-psabi -Wno-write-strings -fsigned-char -w -g $CPlusPlusStdFlag$ -fstack-protector -fomit-frame-pointer -fno-strict-aliasing'
@@ -47,7 +48,6 @@ Compiler( 'clangC' )
 
     .IncludePaths       = ' -I$NDKRoot$\sources\cxx-stl\llvm-libc++\include'
                         + ' -I$NDKRoot$\sources\android\support\include'
-                        + ' -I$NDKRoot$\sysroot\usr\include'
                         + ' -I$NDKRoot$\sysroot\usr\include\arm-linux-androideabi'
     .Librarian          = '$NDKToolchainArmRoot$\arm-linux-androideabi-ar.exe'
     .Linker             = '$NDKToolchainClangRoot$\clang.exe'
@@ -73,7 +73,6 @@ Compiler( 'clangC' )
                         + ' -L$NDKRoot$\sources\cxx-stl\llvm-libc++\libs\armeabi-v7a'
                         + ' -L$NDKRoot$\platforms\$NDKPlatform$\arch-arm\usr\lib'
                         + ' -I$NDKToolchainArmGccRoot$\lib\gcc\arm-linux-androideabi\4.9.x\armv7-a'
-                        + ' -I$NDKRoot$\sources\cxx-stl\llvm-libc++\libs\armeabi-v7a'
     .IncludePaths       + ' -I$NDKRoot$\sysroot\usr\include'
 ]
 
@@ -88,12 +87,12 @@ Compiler( 'clangC' )
 ]
 
 {
-    .Project = 
+    .Project =
     [
         .Name = 'GLES2'
         .Location = '.'
         .SolutionDefines = ''
-        
+
     ]
 
     Using(.Project)
@@ -104,7 +103,7 @@ Compiler( 'clangC' )
         Using(.AndroidArmBaseConfig)
 
         .CompilerInputFiles = {
-            '$Location$/gl_code.cpp',
+            '$Location$/gl_code.c',
         }
         .CompilerOutputPath = '$Location$/obj/ARM/Release/'
         .IncludeDirs = '$Location$'
@@ -116,7 +115,7 @@ Compiler( 'clangC' )
         Using(.AndroidReleaseBaseConfig)
         Using(.AndroidArmBaseConfig)
 
-        .Libraries = { 
+        .Libraries = {
             "GLES2_obj_C++-Release-ARM",
         }
 ;       .LinkerLinkOpjects = false
@@ -124,14 +123,14 @@ Compiler( 'clangC' )
         .LinkerType = "auto"
         .LinkerOutput = '$Location$/release/libs/armeabi-v7a/libGLES2.so'
     }
-    
+
     ObjectList('GLES2_obj_C++-Debug-ARM')
     {
         Using(.AndroidDebugBaseConfig)
         Using(.AndroidArmBaseConfig)
 
         .CompilerInputFiles = {
-            '$Location$/gl_code.cpp',
+            '$Location$/gl_code.c',
         }
         .CompilerOutputPath = '$Location$/obj/ARM/Debug/'
         .IncludeDirs = '$Location$'
@@ -143,8 +142,8 @@ Compiler( 'clangC' )
         Using(.AndroidDebugBaseConfig)
         Using(.AndroidArmBaseConfig)
 
-        .EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
-        .Libraries = { 
+        ;.EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
+        .Libraries = {
             'GLES2_obj_C++-Debug-ARM'
         }
         ;.LinkerLinkOpjects = false
@@ -153,6 +152,7 @@ Compiler( 'clangC' )
         .LinkerType = "auto"
         .LinkerOutput = '$Location$/debug/libs/armeabi-v7a/libhello-GLES2.so'
     }
+
 }
 
 Alias('all')
