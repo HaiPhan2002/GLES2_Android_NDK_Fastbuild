@@ -1,6 +1,6 @@
 ; Automatic Android Paths
 ;-------------------------
-.NDKRoot = 'e:\DevTools\android-ndk-r17'
+.NDKRoot = 'e:\DevTools\android-ndk-r17b'
 .NATIVE_API_LEVEL    = '16'
 .NDKToolchainVersion = '4.9'
 .NDKToolchains       = '$NDKRoot$\toolchains'
@@ -50,7 +50,7 @@ Compiler( 'clangC' )
                         + ' -I$NDKRoot$\sources\android\support\include'
                         + ' -I$NDKRoot$\sysroot\usr\include\arm-linux-androideabi'
     .Librarian          = '$NDKToolchainArmRoot$\arm-linux-androideabi-ar.exe'
-    .Linker             = '$NDKToolchainClangRoot$\clang.exe'
+    .Linker             = '$NDKToolchainClangRoot$\clang++.exe'
     .LibrarianOptions   = '-r -s %2 %1'
     .LinkerOptions      = ' -shared -o %2 %1'
                         + ' -march=armv7-a'
@@ -59,13 +59,13 @@ Compiler( 'clangC' )
                         + ' -gcc-toolchain $NDKToolchainArmGccRoot$'
                         + ' -target armv7-none-linux-androideabi'
                         + ' -v'
-    .LinkerSystemLibs   = '-lGLESv2 -llog -lEGL -lc -lc++_static -lc++abi -landroid_support'
+    .LinkerSystemLibs   = '-lGLESv2 -llog -lEGL -lc'
 ]
 
 .AndroidArmBaseConfig = [
     Using( .AndroidBaseConfig )
-    .DEFINES            + ' -D__ARM_ARCH_7__'
-    .CFLAGS             + ' -D__ANDROID_API__=$NATIVE_API_LEVEL$ -target armv7a-none-linux-androideabi -marm -march=armv7-a -mtune=krait -mfpu=neon-vfpv4 -mfloat-abi=softfp -stdlib=libc++'
+    .DEFINES            + ' -D__ARM_ARCH_7__ -D__ANDROID_API__=$NATIVE_API_LEVEL$'
+    .CFLAGS             + ' -target armv7-none-linux-androideabi -marm -march=armv7-a -mtune=krait -mfpu=neon-vfpv4 -mfloat-abi=softfp -stdlib=libc++'
     .Librarian          = '$NDKToolchainArmRoot$\$NDKToolchainArmType$-ar.exe'
     .Strip              = '$NDKToolchainArmRoot$\$NDKToolchainArmType$-strip.exe'
     .ObjCopy            = '$NDKToolchainArmRoot$\$NDKToolchainArmType$-objcopy.exe'
@@ -103,7 +103,7 @@ Compiler( 'clangC' )
         Using(.AndroidArmBaseConfig)
 
         .CompilerInputFiles = {
-            '$Location$/gl_code.c',
+            '$Location$/gl_code.cpp',
         }
         .CompilerOutputPath = '$Location$/obj/ARM/Release/'
         .IncludeDirs = '$Location$'
@@ -142,11 +142,11 @@ Compiler( 'clangC' )
         Using(.AndroidDebugBaseConfig)
         Using(.AndroidArmBaseConfig)
 
-        ;.EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
+        .EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
         .Libraries = {
             'GLES2_obj_C++-Debug-ARM'
         }
-        ;.LinkerLinkOpjects = false
+        .LinkerLinkOpjects = false
         .LinkerOptions  + ' $LinkerSystemLibs$'
                         + ' $LinkerSystemPaths$'
         .LinkerType = "auto"
@@ -158,7 +158,7 @@ Compiler( 'clangC' )
 Alias('all')
 {
     .Targets = {
-        'GLES2-Release-ARM',
+        ;'GLES2-Release-ARM',
         'GLES2-Debug-ARM',
     }
 }
