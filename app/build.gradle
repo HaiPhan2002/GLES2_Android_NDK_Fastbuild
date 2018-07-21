@@ -22,6 +22,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    /*
     sourceSets
     {
         debug {
@@ -32,16 +33,19 @@ android {
         }
 
     }
+    */
     externalNativeBuild {
         ndkBuild {
             path 'src/main/jni/Android.mk'
         }
     }
+/*
     gradle.taskGraph.beforeTask { Task task ->
         if (task.name.contains("externalNativeBuild")) {
             task.enabled = false
         }
     }
+*/
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
