@@ -1,0 +1,318 @@
+; Automatic Android Paths
+;-------------------------
+// .NDKRoot = 'E:/DevTools/android-ndk-r17b'
+.NDKRoot = '/home/haiphan/Android/android-ndk-r20'
+.NATIVE_API_LEVEL    = '16'
+.NATIVE_API_LEVEL_ARM64 = '21'
+.NDKToolchainVersion = '4.9'
+.NDKToolchains       = '$NDKRoot$/toolchains'
+.NDKToolchainArmType = 'arm-linux-androideabi'
+.NDKToolchainArm64Type = 'aarch64-linux-android'
+.NDKToolchainX86Type = 'i686-linux-android'
+.NDKToolchainArmGccRoot = '$NDKToolchains$/arm-linux-androideabi-4.9/prebuilt/linux-x86_64'
+.NDKToolchainArmRoot = '$NDKToolchainArmGccRoot$/bin'
+.NDKGCCArmLibs = '$NDKToolchainArmGccRoot$/lib/gcc/arm-linux-androideabi/4.9.x/'
+.NDKToolchainArm64GccRoot = '$NDKToolchains$/aarch64-linux-android-4.9/prebuilt/linux-x86_64'
+.NDKToolchainArm64Root = '$NDKToolchainArm64GccRoot$/bin'
+.NDKToolchainX86GccRoot = '$NDKToolchains$/x86-4.9/prebuilt/linux-x86_64'
+.NDKToolchainX86Root = '$NDKToolchainX86GccRoot$/bin'
+.NDKToolchainClangRoot = '$NDKToolchains$/llvm/prebuilt/linux-x86_64/bin'
+.NDKToolchainClangNdkRoot = '$NDKToolchains$/llvm/prebuilt/linux-x86_64/bin'
+.NDKPlatform         = 'android-$NATIVE_API_LEVEL$'
+
+;Android Compilers
+;---------------------
+Compiler( 'clang' )
+{
+    .Executable     = '$NDKToolchainClangRoot$/clang++'
+}
+
+Compiler( 'clangC' )
+{
+    .Executable     = '$NDKToolchainClangRoot$/clang'
+}
+
+;Android configurations
+;----------------------
+.AndroidBaseConfig = [
+    .Platform           = 'Android'
+    .Compiler           = 'clang'
+    ;.Compiler          = 'clangC'
+    .CPlusPlusStdFlag   = ' -std=c++11'
+    .DEFINES            = '-D__ANDROID__ -DOS_ANDROID -DANDROID -D_ANDROID_ -D_ANDROID -DANDROID_NDK'
+    .CFLAGS             = ' -fvisibility=hidden -fPIC'
+                        + ' -Wno-psabi -Wno-write-strings -fsigned-char -w -g $CPlusPlusStdFlag$ -fstack-protector -fomit-frame-pointer -fno-strict-aliasing'
+                        + ' -finline-limit=300 -pipe -ftree-vectorize -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections'
+                        + ' -funwind-tables -fasynchronous-unwind-tables'
+                        + ' -finline-functions -funswitch-loops -funroll-loops'
+
+    .IncludePaths       = ' -I$NDKRoot$/sources/cxx-stl/llvm-libc++/include'
+                        + ' -I$NDKRoot$/sources/android/support/include'
+                        + ' -I$NDKRoot$/sysroot/usr/include'
+    .Linker             = '$NDKToolchainClangRoot$/clang++'
+    .LibrarianOptions   = '-r -s %2 %1'
+    .LinkerOptions      = ' -shared -o %2 %1'
+                        + ' -z relro -z now'
+                        + ' -z noexecstack'
+                        + ' -v'
+    .LinkerSystemLibs   = '-lGLESv2 -llog -lEGL -lc'
+]
+
+.AndroidArmBaseConfig = [
+    Using( .AndroidBaseConfig )
+    .DEFINES            + ' -D__ANDROID_API__=$NATIVE_API_LEVEL$'
+    .CFLAGS             + ' -target armv7-none-linux-androideabi -marm -march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=softfp'
+    .Librarian          = '$NDKToolchainArmRoot$/$NDKToolchainArmType$-ar'
+    .StripExecutable    = '$NDKToolchainArmRoot$/$NDKToolchainArmType$-strip'
+    .ObjectCopyExecutable = '$NDKToolchainArmRoot$/$NDKToolchainArmType$-objcopy'
+    .LinkerSystemPaths  = ' --sysroot=$NDKRoot$/platforms/$NDKPlatform$/arch-arm'
+                        + ' -L$NDKRoot$/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a'
+                        + ' -L$NDKRoot$/platforms/$NDKPlatform$/arch-arm/usr/lib'
+    .Linker             = '$NDKToolchainArmRoot$/arm-linux-androideabi-ld'                    
+    .LinkerOptions      + ' -march=armv7-a'
+                        + ' -g'
+    .IncludePaths       + ' -I$NDKRoot$/sysroot/usr/include/arm-linux-androideabi'
+]
+
+.AndroidArm64BaseConfig = [
+    Using( .AndroidBaseConfig )
+    .DEFINES            + ' -D__ANDROID_API__=$NATIVE_API_LEVEL_ARM64$'
+    .CFLAGS             + ' -target arm64-none-linux-androideabi'
+                        + ' -march=armv8-a'
+                        + ' -mfloat-abi=softfp'
+    .Librarian          = '$NDKToolchainArm64Root$/$NDKToolchainArm64Type$-ar'
+    .StripExecutable    = '$NDKToolchainArm64Root$/$NDKToolchainArm64Type$-strip'
+    .ObjectCopyExecutable = '$NDKToolchainArm64Root$/$NDKToolchainArm64Type$-objcopy'
+    .LinkerSystemPaths  = ' --sysroot=$NDKRoot$/platforms/android-$NATIVE_API_LEVEL_ARM64$/arch-arm64'
+                        + ' -L$NDKRoot$/sources/cxx-stl/llvm-libc++/libs/arm64-v8a'
+                        + ' -L$NDKRoot$/platforms/android-$NATIVE_API_LEVEL_ARM64$/arch-arm64/usr/lib'
+                        + ' -I$NDKToolchainArm64GccRoot$/lib/gcc/aarch64-linux-android/4.9.x'
+    .LinkerOptions      + ' -target arm64-linux-androideabi'
+                        + ' -march=armv8-a'
+                        + ' -gcc-toolchain $NDKToolchainArm64GccRoot$'
+    .IncludePaths       + ' -I$NDKRoot$/sysroot/usr/include/aarch64-linux-android'
+]
+
+.Androidx86BaseConfig = [
+    Using( .AndroidBaseConfig )
+    .DEFINES            + ' -D__ANDROID_API__=$NATIVE_API_LEVEL$'
+    .CFLAGS             + ' -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32 -mfloat-abi=softfp'
+    .Librarian          = '$NDKToolchainX86GccRoot$/$NDKToolchainX86Type$-ar'
+    .StripExecutable    = '$NDKToolchainX86GccRoot$/$NDKToolchainX86Type$-strip'
+    .ObjectCopyExecutable = '$NDKToolchainX86Root$/$NDKToolchainX86Type$-objcopy'
+    .LinkerSystemPaths  = ' --sysroot=$NDKRoot$/platforms/$NDKPlatform$/arch-x86'
+                        + ' -L$NDKRoot$/sources/cxx-stl/llvm-libc++/libs/x86'
+                        + ' -L$NDKRoot$/platforms/$NDKPlatform$/arch-x86/usr/lib'
+    .Linker             = '$NDKToolchainX86Root$/i686-linux-android-ld'                    
+    .LinkerOptions      + ' -march=i686'
+                        + ' -g'
+                        // + ' -v'
+    .IncludePaths       + ' -I$NDKRoot$/sysroot/usr/include/i686-linux-android'
+]
+
+.AndroidReleaseBaseConfig = [
+    Using( .AndroidBaseConfig )
+    .additionalDefines   = ' -DNDEBUG'
+    .additionalFlags     = ' -O3'
+]
+
+.AndroidDebugBaseConfig = [
+    Using( .AndroidBaseConfig )
+    .additionalDefines   = ' -UNDEBUG'
+    .additionalFlags     = ' -O0'
+]
+
+{
+    .Project =
+    [
+        .Name = 'GLES2'
+        .Location = '.'
+        .SolutionDefines = ''
+
+    ]
+
+    Using(.Project)
+
+    ObjectList('GLES2_obj_C++-Release-ARM')
+    {
+        Using(.AndroidReleaseBaseConfig)
+        Using(.AndroidArmBaseConfig)
+
+        .CompilerInputFiles = {
+            '$Location$/gl_code.cpp',
+        }
+        .CompilerOutputPath = '$Location$/obj/ARM/Release/'
+        .IncludeDirs = '$Location$'
+        .CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2'
+    }
+
+    DLL('GLES2-Release-ARM')
+    {
+        Using(.AndroidReleaseBaseConfig)
+        Using(.AndroidArmBaseConfig)
+
+        .Libraries = {
+            "GLES2_obj_C++-Release-ARM",
+        }
+        .LinkerOptions + ' $LinkerSystemLibs$ $LinkerSystemPaths$'
+        .LinkerType = "auto"
+        .LinkerOutput = '$Location$/Release/libs/armeabi-v7a/libGLES2.so'
+    }
+
+    ObjectList('GLES2_obj_C++-Debug-ARM')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.AndroidArmBaseConfig)
+
+        .CompilerInputFiles = {
+            '$Location$/gl_code.cpp',
+        }
+        .CompilerOutputPath = '$Location$/obj/ARM/Debug/'
+        .IncludeDirs = '$Location$'
+        .CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2'
+    }
+
+    DLL('GLES2-Debug-ARM')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.AndroidArmBaseConfig)
+
+        .EntryPointLibsList = 'GLES2_obj_C-Debug-ARM'
+        .Libraries = {
+            'GLES2_obj_C++-Debug-ARM'
+        }
+        .LinkerLinkOpjects = false
+        .LinkerOptions  + ' $LinkerSystemLibs$'
+                        + ' $LinkerSystemPaths$'
+        .LinkerType = "auto"
+        .LinkerOutput = '$Location$/debug/libs/armeabi-v7a/libhello-GLES2.so'
+    }
+
+    ObjectList('GLES2_obj_C++-Debug-x86')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.Androidx86BaseConfig)
+
+        .CompilerInputFiles = {
+            '$Location$/gl_code.cpp',
+        }
+        .CompilerOutputPath = '$Location$/obj/x86/Debug/'
+        .IncludeDirs = '$Location$'
+        .CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2'
+    }
+
+    DLL('GLES2-Debug-x86')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.Androidx86BaseConfig)
+
+        .EntryPointLibsList = 'GLES2_obj_C-Debug-x86'
+        .Libraries = {
+            'GLES2_obj_C++-Debug-x86'
+        }
+        .LinkerLinkOpjects = false
+        .LinkerOptions  + ' $LinkerSystemLibs$'
+                        + ' $LinkerSystemPaths$'
+        .LinkerType = "auto"
+        .LinkerOutput = '$Location$/debug/libs/x86/libhello-GLES2.so'
+    }
+
+    ObjectList('GLES2_obj_C++-Release-x86')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.Androidx86BaseConfig)
+
+        .CompilerInputFiles = {
+            '$Location$/gl_code.cpp',
+        }
+        .CompilerOutputPath = '$Location$/obj/x86/Release/'
+        .IncludeDirs = '$Location$'
+        .CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2'
+    }
+
+    DLL('GLES2-Release-x86')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.Androidx86BaseConfig)
+
+        .EntryPointLibsList = 'GLES2_obj_C-Debug-x86'
+        .Libraries = {
+            'GLES2_obj_C++-Debug-x86'
+        }
+        .LinkerLinkOpjects = false
+        .LinkerOptions  + ' $LinkerSystemLibs$'
+                        + ' $LinkerSystemPaths$'
+        .LinkerType = "auto"
+        .LinkerOutput = '$Location$/Release/libs/x86/libhello-GLES2.so'
+    }
+    
+    ObjectList('GLES2_obj_C++-Debug-ARM64')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.AndroidArm64BaseConfig)
+
+        .CompilerInputFiles = {
+            '$Location$/gl_code.cpp',
+        }
+        .CompilerOutputPath = '$Location$/obj/ARM64/Debug/'
+        .IncludeDirs = '$Location$'
+        .CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2 -v'
+    }
+
+    DLL('GLES2-Debug-ARM64')
+    {
+        Using(.AndroidDebugBaseConfig)
+        Using(.AndroidArm64BaseConfig)
+
+        .EntryPointLibsList = 'GLES2_obj_C-Debug-ARM64'
+        .Libraries = {
+            'GLES2_obj_C++-Debug-ARM64'
+        }
+        .LinkerLinkOpjects = false
+        .LinkerOptions  + ' $LinkerSystemLibs$'
+                        + ' $LinkerSystemPaths$'
+        .LinkerType = "auto"
+        .LinkerOutput = '$Location$/debug/libs/arm64-v8a/libhello-GLES2.so'
+    }
+
+    ObjectList('GLES2_obj_C++-Release-ARM64')
+    {
+        Using(.AndroidReleaseBaseConfig)
+        Using(.AndroidArm64BaseConfig)
+
+        .CompilerInputFiles = {
+            '$Location$/gl_code.cpp',
+        }
+        .CompilerOutputPath = '$Location$/obj/ARM64/Debug/'
+        .IncludeDirs = '$Location$'
+        .CompilerOptions = '$DEFINES$ $CFLAGS$ $IncludePaths$ -c %1 -o %2'
+    }
+
+    DLL('GLES2-Release-ARM64')
+    {
+        Using(.AndroidReleaseBaseConfig)
+        Using(.AndroidArm64BaseConfig)
+
+        .EntryPointLibsList = 'GLES2_obj_C-Debug-ARM64'
+        .Libraries = {
+            'GLES2_obj_C++-Debug-ARM64'
+        }
+        .LinkerLinkOpjects = false
+        .LinkerOptions  + ' $LinkerSystemLibs$'
+                        + ' $LinkerSystemPaths$'
+        .LinkerType = "auto"
+        .LinkerOutput = '$Location$/Release/libs/arm64-v8a/libhello-GLES2.so'
+    }
+}
+
+Alias('all')
+{
+    .Targets = {
+        // 'GLES2-Release-ARM',
+        // 'GLES2-Debug-ARM',
+        // 'GLES2-Release-ARM64',
+        // 'GLES2-Debug-ARM64',
+        'GLES2-Debug-x86',
+        'GLES2-Release-x86',
+    }
+}
